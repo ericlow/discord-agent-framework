@@ -9,6 +9,22 @@ loop. Users define an `Agent` (system prompt + model + tools) and the framework
 provides the Discord runtime: interactions endpoint, deferred-response handling,
 live progress streaming, and Postgres-backed conversation persistence.
 
+## Design goals
+
+These goals drive every decision here — weigh changes against them:
+
+1. **Accessible to all skill levels.** A beginner should be able to build and ship
+   a Discord agent. Minimize required setup, services, and prior knowledge; prefer
+   sane defaults and a short happy path over configurability.
+2. **Free cloud hosting.** The blessed deployment path must run on free-tier cloud
+   hosting — no paid infrastructure required to get an agent live.
+3. **Built with agentic coding tools.** Developers are expected to use Claude Code
+   (or a similar agentic framework) to build their agent. Keep the structure clear,
+   this file strong, and provide templates/examples an AI agent can extend cleanly.
+4. **Claude first, provider-agnostic later.** The AI is Claude for now. Leave room
+   to support other LLM providers eventually, but do not build multi-provider
+   abstraction before it's needed.
+
 ## Commands
 
 ```bash
