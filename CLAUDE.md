@@ -145,6 +145,9 @@ save progress." Keep each commit a single logical change.
 - Lead with a **1–2 sentence statement** of the decision, before any other prose.
 - Sections: **Context · Decision · Status · Consequences** (note alternatives
   considered and why rejected).
+- Alternatives must carry **concrete detail** — key specs, limits, or evidence and
+  how each fails our needs — enough for the reader to independently agree, not bare
+  assertions. Flag figures that should be verified.
 - Status flow: `proposed → accepted → superseded` (link the superseding ADR).
 - Write the ADR when the decision is made, not retroactively.
 

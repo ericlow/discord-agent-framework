@@ -10,16 +10,15 @@ webhook/defer/engine pattern the code already uses.**
 
 ## Context
 
-The framework's blessed deployment path needs to host a Discord **interactions
-endpoint**: an HTTPS URL that verifies Discord's Ed25519 signature, answers the
-verification PING, and runs an agent tool-use loop that can take far longer than
-Discord's 3-second reply window. Design goals require the path to run on **free
-cloud hosting** and be **approachable for all skill levels**.
+We need to host a Discord interactions endpoint: an HTTPS URL that verifies the
+Ed25519 signature, answers the PING, and runs an agent tool-use loop that far
+exceeds Discord's 3-second reply window. Design goals require **free hosting** and
+**all-skill-level** accessibility.
 
-The request/response, bursty nature of a webhook agent fits a serverless model
-well (no always-on server). The existing codebase is already structured around
-this shape: a single function serving two roles (front-half defer + engine
-self-invoke).
+This shapes the platform requirements: run **Python** with binary deps
+(`psycopg2`, `PyNaCl`); support **long-running** work (tens of seconds to minutes);
+and allow a **deferred + background** execution model (reply fast, finish the loop
+asynchronously). The code is already built this way — one function, two roles.
 
 ## Decision
 
@@ -42,6 +41,22 @@ asynchronously in `mode: "engine"`).
 
 ## Alternatives considered
 
-- **Cloudflare Workers / Vercel / Deno Deploy** — lower setup friction and a better
-  fit for the beginner/free goals, but a larger port away from the Lambda-shaped
-  code. Rejected for now: the decision is to continue on AWS.
+Evaluated against our three needs — Python + binary deps, long-running work, and a
+deferred/background model — plus the free tier and setup friction.
+
+| Platform | Free tier | Max exec time | Python + binary deps | Fit for our model |
+|---|---|---|---|---|
+| **AWS Lambda** | 1M req/mo + 400k GB-s | 15 min | Yes (zip/layer, manylinux wheels) | Native: async self-invoke for engine mode |
+| **Cloudflare Workers** | ~100k req/day | 30s CPU (paid); tight on free | Python is beta (Pyodide/WASM); C-extensions like `psycopg2` not supported | Background via `waitUntil`/Queues, but Python+binary story is the blocker |
+| **Vercel** | Hobby (non-commercial only) | 10s default, up to 60s on Hobby | Python functions supported; binary deps workable | Long agent loops risk the duration cap; Hobby ToS bars commercial use |
+| **Deno Deploy** | Generous free tier | ~short per-request | **JS/TS runtime — no Python** | Would require a full rewrite |
+
+**Why AWS wins for now:** it's the only option that runs our existing Python +
+binary-dep code unchanged, comfortably exceeds the runtime our tool loop needs, and
+has a first-class async invocation for the deferred engine. Workers' Python/WASM
+can't load `psycopg2`; Vercel's Hobby duration cap and non-commercial ToS are
+risks; Deno is the wrong language. The cost is setup friction (IAM, packaging),
+mitigated by IaC + docs.
+
+> Free-tier limits and duration caps above should be re-verified against current
+> provider docs before this ADR is treated as final — they change frequently.
