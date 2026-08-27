@@ -1,0 +1,26 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "discord-agent-framework"
+version = "0.1.0"
+description = "A framework for building Discord AI agents on the Claude tool-use loop"
+readme = "README.md"
+requires-python = ">=3.9"
+license = { text = "MIT" }
+dependencies = [
+    "anthropic",
+    "requests",
+    "PyNaCl>=1.5.0",
+    "psycopg2-binary",
+    "beautifulsoup4",
+    "lxml",
+    "python-dotenv",
+]
+
+[project.optional-dependencies]
+dev = ["pytest", "responses"]
+
+[tool.setuptools.packages.find]
+include = ["discord_agent*"]
