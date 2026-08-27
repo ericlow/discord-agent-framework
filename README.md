@@ -86,6 +86,28 @@ sources).
 - A Discord application + bot
 - A Jina API key (only if you use the built-in web tools)
 
+## Known trade-offs & open questions
+
+The framework's [design goals](CLAUDE.md#design-goals) are: accessible to all skill
+levels, deployable on free cloud hosting, friendly to agentic coding tools, and
+Claude-first (provider-agnostic later). A couple of current choices are in tension
+with the first two goals and are still open for reconsideration:
+
+- **AWS Lambda as the runtime.** The webhook/interactions model is a good fit for
+  free serverless hosting (no always-on server), but AWS specifically — account
+  signup, IAM, credit card, Function URL — is a steep on-ramp for a beginner. Other
+  free serverless hosts with the same request/response shape (e.g. Cloudflare
+  Workers, Vercel, Deno Deploy) may lower the barrier. The "blessed" free-hosting
+  path is not yet settled.
+- **Mandatory Postgres.** Conversation persistence currently requires a Postgres
+  database (a second service to provision, even on a free tier). For a beginner's
+  first agent this may be more than is needed; persistence could become *optional*
+  with a zero-setup default, and Postgres opt-in for multi-turn follow-ups.
+- **Single provider.** The agent loop is Claude-only today. Supporting other LLM
+  providers is a possible future direction, deliberately deferred until needed.
+
+Contributions and opinions on these are welcome.
+
 ## License
 
 MIT — see [LICENSE](LICENSE).
