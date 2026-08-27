@@ -57,6 +57,3 @@ finish the loop asynchronously).
 natively fits the defer/async model while running Python with binary deps. EC2 fails
 the free-forever goal (12-month trial). Workers, Vercel, and Deno each break on
 Python, duration, or licensing.
-
-> Free-tier terms above should be re-verified against current provider docs before
-> this ADR is treated as final — they change frequently.
