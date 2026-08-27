@@ -3,8 +3,10 @@
 _Status: accepted_
 _Date: 2026-08-27_
 
-**We will host the framework on AWS Lambda, exposed via a Function URL, with one
-function serving both the Discord interactions front-half and the agent engine.**
+**We will host the framework on AWS Lambda (Function URL, one function serving both
+the interactions front-half and the engine) because its free tier — 1M requests per
+month — covers expected load at no cost, and its serverless model fits the
+webhook/defer/engine pattern the code already uses.**
 
 ## Context
 
