@@ -142,6 +142,7 @@ save progress." Keep each commit a single logical change.
 
 - Record significant or hard-to-reverse architectural decisions as ADRs in
   `docs/adr/ADR-NNN-title.md`, numbered sequentially, one decision per file.
+- Lead with a **1–2 sentence statement** of the decision, before any other prose.
 - Sections: **Context · Decision · Status · Consequences** (note alternatives
   considered and why rejected).
 - Status flow: `proposed → accepted → superseded` (link the superseding ADR).
