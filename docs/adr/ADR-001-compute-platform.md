@@ -29,9 +29,9 @@ asynchronously in `mode: "engine"`).
 ## Consequences
 
 **Positive**
-- Generous free tier; no always-on cost.
-- Serverless matches the webhook/defer/engine pattern the code already uses.
-- Consistent with the existing implementation — minimal rework.
+- Always-free tier; no always-on cost.
+- Serverless natively supports the webhook/defer/engine pattern (async self-invoke).
+- Runs Python with binary deps, so the agent can be built directly against it.
 
 **Negative / costs**
 - Setup friction (AWS account, IAM, Function URL, self-invoke permission) works
@@ -54,9 +54,9 @@ finish the loop asynchronously).
 | **Deno Deploy** | Yes | No — **JS/TS runtime, not Python**; full rewrite |
 
 **Why AWS Lambda:** it's the only option that is free with no time limit *and*
-natively fits the defer/async model without changing our Python code. EC2 fails the
-free-forever goal (12-month trial). Workers, Vercel, and Deno each break on Python,
-duration, or licensing.
+natively fits the defer/async model while running Python with binary deps. EC2 fails
+the free-forever goal (12-month trial). Workers, Vercel, and Deno each break on
+Python, duration, or licensing.
 
 > Free-tier terms above should be re-verified against current provider docs before
 > this ADR is treated as final — they change frequently.
