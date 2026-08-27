@@ -126,3 +126,14 @@ save progress." Keep each commit a single logical change.
 ## Reusable workflows
 
 - Put reusable procedural workflows in `.claude/skills/`, not ad-hoc in chat.
+
+## Infrastructure & deployment
+
+- All cloud infra is defined as **IaC** (Terraform) and committed to the repo. Never
+  create or modify infra by hand in a cloud console.
+- All deploys run through a **CI workflow** (GitHub Actions) — no manual, local, or
+  console deploys.
+- Do not click-ops or deploy via console. If the infra/deploy pipeline doesn't exist
+  yet, write the IaC + CI *first*, then deploy through it.
+- Human-only steps (account signup, adding credentials/secrets) must be minimal and
+  documented; everything else is automated.
