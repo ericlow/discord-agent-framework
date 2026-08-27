@@ -137,3 +137,21 @@ save progress." Keep each commit a single logical change.
   yet, write the IaC + CI *first*, then deploy through it.
 - Human-only steps (account signup, adding credentials/secrets) must be minimal and
   documented; everything else is automated.
+
+## Architecture decision records (ADRs)
+
+- Record significant or hard-to-reverse architectural decisions as ADRs in
+  `docs/adr/ADR-NNN-title.md`, numbered sequentially, one decision per file.
+- Sections: **Context · Decision · Status · Consequences** (note alternatives
+  considered and why rejected).
+- Status flow: `proposed → accepted → superseded` (link the superseding ADR).
+- Write the ADR when the decision is made, not retroactively.
+
+Write an ADR when:
+- Choosing or replacing a platform, host, or major dependency.
+- A decision spans multiple components or is costly to reverse (data model, auth,
+  packaging approach).
+- Picking one option among several with real trade-offs.
+- Overriding a prior ADR or a design goal.
+
+When a request meets a trigger, flag that an ADR is needed and pause before proceeding.
