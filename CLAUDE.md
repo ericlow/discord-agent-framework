@@ -73,3 +73,34 @@ model, tools, command def) and a `handler.py` that wires `Agent` + `persistence`
 - Python 3.9+. Use `.venv/` in the repo root; always invoke `python3`.
 - Default model is `claude-opus-4-8` (`agent.DEFAULT_MODEL`).
 - Built-in tools (`discord_agent/builtins/`) use the Jina API (`JINA_API_KEY`).
+
+## Commit policy
+
+**Branching:** During this early phase, commit directly to `main` — no feature
+branches. (Revisit once the public API stabilizes or outside contributors arrive.)
+
+**When to commit** — do this proactively, without waiting to be asked:
+
+- After a unit of work is complete and the tree is in a working state — code
+  imports/runs and `pytest` passes.
+- After a self-contained, user-approved change lands — one feature, one fix, or
+  one coherent doc edit is one commit.
+- Before ending a session or handing off, commit whatever is in a good state.
+
+Do **not** commit mid-task, partial or broken work, failing tests, or "just to
+save progress." Keep each commit a single logical change.
+
+**Before every commit:**
+
+1. Run `pytest` — it must pass.
+2. Run the privacy/secret check and confirm it is clean: no credentials (API keys,
+   tokens, connection strings) and no non-public identifiers in any committable
+   file. (The exact scan is kept out of this file on purpose; run it from local
+   project notes.)
+
+**Message format:**
+
+- Imperative subject line, ~50–72 chars ("Add X", not "Added X").
+- For anything non-trivial, a blank line then a wrapped body explaining *what* and
+  *why* (not a restatement of the diff).
+- End with the trailer: `Co-Authored-By: Claude Opus 4.8 <noreply@anthropic.com>`
