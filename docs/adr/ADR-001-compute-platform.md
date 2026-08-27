@@ -4,9 +4,9 @@ _Status: accepted_
 _Date: 2026-08-27_
 
 **We will host the framework on AWS Lambda (Function URL, one function serving both
-the interactions front-half and the engine) because its free tier — 1M requests per
-month — covers expected load at no cost, and its serverless model fits the
-webhook/defer/engine pattern the code already uses.**
+the interactions front-half and the engine) because its *always-free* tier — 1M
+requests/month with no 12-month expiry — meets the free-hosting goal permanently,
+and its serverless model fits the Discord webhook/defer/engine pattern.**
 
 ## Context
 
@@ -18,7 +18,7 @@ exceeds Discord's 3-second reply window. Design goals require **free hosting** a
 This shapes the platform requirements: run **Python** with binary deps
 (`psycopg2`, `PyNaCl`); support **long-running** work (tens of seconds to minutes);
 and allow a **deferred + background** execution model (reply fast, finish the loop
-asynchronously). The code is already built this way — one function, two roles.
+asynchronously).
 
 ## Decision
 
@@ -41,22 +41,22 @@ asynchronously in `mode: "engine"`).
 
 ## Alternatives considered
 
-Evaluated against our three needs — Python + binary deps, long-running work, and a
-deferred/background model — plus the free tier and setup friction.
+Judged primarily on the two design goals: **free forever** (not just a trial), and
+**fits the Discord interaction model** (an HTTPS endpoint that can defer and then
+finish the loop asynchronously).
 
-| Platform | Free tier | Max exec time | Python + binary deps | Fit for our model |
-|---|---|---|---|---|
-| **AWS Lambda** | 1M req/mo + 400k GB-s | 15 min | Yes (zip/layer, manylinux wheels) | Native: async self-invoke for engine mode |
-| **Cloudflare Workers** | ~100k req/day | 30s CPU (paid); tight on free | Python is beta (Pyodide/WASM); C-extensions like `psycopg2` not supported | Background via `waitUntil`/Queues, but Python+binary story is the blocker |
-| **Vercel** | Hobby (non-commercial only) | 10s default, up to 60s on Hobby | Python functions supported; binary deps workable | Long agent loops risk the duration cap; Hobby ToS bars commercial use |
-| **Deno Deploy** | Generous free tier | ~short per-request | **JS/TS runtime — no Python** | Would require a full rewrite |
+| Platform | Free forever? | Fits the interaction model? |
+|---|---|---|
+| **AWS Lambda** | **Yes** — always-free 1M req/mo, no expiry | **Yes** — Function URL + async self-invoke for the deferred engine |
+| **AWS EC2** | **No** — free tier is 750 hrs/mo for **12 months only**, then paid | Yes — an always-on server could host it |
+| **Cloudflare Workers** | Yes — ~100k req/day | Partial — webhook works, but Python is WASM/Pyodide and can't load `psycopg2` |
+| **Vercel** | Partial — Hobby is free but **non-commercial only** | Risky — function duration caps (10–60s) vs a long tool loop |
+| **Deno Deploy** | Yes | No — **JS/TS runtime, not Python**; full rewrite |
 
-**Why AWS wins for now:** it's the only option that runs our existing Python +
-binary-dep code unchanged, comfortably exceeds the runtime our tool loop needs, and
-has a first-class async invocation for the deferred engine. Workers' Python/WASM
-can't load `psycopg2`; Vercel's Hobby duration cap and non-commercial ToS are
-risks; Deno is the wrong language. The cost is setup friction (IAM, packaging),
-mitigated by IaC + docs.
+**Why AWS Lambda:** it's the only option that is free with no time limit *and*
+natively fits the defer/async model without changing our Python code. EC2 fails the
+free-forever goal (12-month trial). Workers, Vercel, and Deno each break on Python,
+duration, or licensing.
 
-> Free-tier limits and duration caps above should be re-verified against current
-> provider docs before this ADR is treated as final — they change frequently.
+> Free-tier terms above should be re-verified against current provider docs before
+> this ADR is treated as final — they change frequently.
