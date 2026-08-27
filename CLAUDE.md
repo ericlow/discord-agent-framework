@@ -104,3 +104,25 @@ save progress." Keep each commit a single logical change.
 - For anything non-trivial, a blank line then a wrapped body explaining *what* and
   *why* (not a restatement of the diff).
 - End with the trailer: `Co-Authored-By: Claude Opus 4.8 <noreply@anthropic.com>`
+
+## Challenge & approval before implementing
+
+- Sanity-check every request against the codebase and design goals first. If it's
+  redundant, conflicts with existing structure, or there's a better option — say so
+  and recommend, then stop. Never silently comply with a flawed request.
+- Do not start implementation until the user approves the approach. Small,
+  explicitly-requested edits are fine; anything with a design choice or multiple
+  files needs sign-off first.
+
+## Spec-driven development
+
+- For non-trivial features, write a short spec in `docs/specs/*.md` and get approval
+  before coding. Specs live in files, never only in chat.
+- Spec sections: **Background/WHY · User story · Acceptance criteria · Technical
+  design · Gherkin scenarios (Given/When/Then) · Decisions · Out of scope**.
+- Pin library versions in specs. Include a failing test (or make it the first
+  implementation step) and keep it as a regression guard.
+
+## Reusable workflows
+
+- Put reusable procedural workflows in `.claude/skills/`, not ad-hoc in chat.
