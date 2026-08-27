@@ -1,0 +1,11 @@
+anthropic
+requests
+PyNaCl>=1.5.0
+psycopg2-binary
+beautifulsoup4
+lxml
+python-dotenv
+
+# dev
+pytest
+responses
