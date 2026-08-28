@@ -88,79 +88,18 @@ sources).
 
 ## Setup
 
-A full walkthrough from nothing to a running agent. If you just want to run the
-tests locally, the [Quickstart](#quickstart) above is enough.
+Full step-by-step guides live in [`docs/setup/`](docs/setup/) — start with the
+[setup index](docs/setup/README.md), which runs in order:
 
-### 1. Gather credentials
+1. [Discord](docs/setup/discord.md) — server, application, bot, invite
+2. [Database](docs/setup/database.md) — free Neon Postgres
+3. [Anthropic](docs/setup/anthropic.md) — Claude API key
+4. [Jina](docs/setup/jina.md) — web-tools key (only for the built-in tools)
+5. [Deploy](docs/setup/deploy.md) — build, `terraform apply`, register the command,
+   and connect Discord
 
-- **Anthropic API key** — from the [Anthropic Console](https://console.anthropic.com/).
-- **Jina API key** — from [jina.ai](https://jina.ai/), only if you use the built-in
-  `search_web` / `fetch_url` tools.
-- **Postgres database** — a local instance, or a free-tier host (e.g. Neon, Supabase).
-  You'll need its connection string as `DATABASE_URL`.
-
-### 2. Create a Discord application
-
-1. Go to the [Discord Developer Portal](https://discord.com/developers/applications)
-   and click **New Application**.
-2. On the **General Information** page, copy the **Application ID** and **Public Key**.
-3. Under **Bot**, click **Reset Token** and copy the **bot token**.
-4. Under **OAuth2 → URL Generator**, select the `applications.commands` and `bot`
-   scopes, then open the generated URL to invite the bot to your server.
-5. (Optional, for instant command registration) enable Developer Mode in Discord,
-   right-click your server, and **Copy Server ID** — this is your `DISCORD_GUILD_ID`.
-
-### 3. Install
-
-```bash
-git clone <your-fork-url> && cd discord-agent-framework
-python3 -m venv .venv && source .venv/bin/activate
-pip install -e ".[dev]"
-```
-
-### 4. Configure environment
-
-```bash
-cp .env.example .env
-```
-
-Fill in `.env`:
-
-```
-ANTHROPIC_API_KEY=sk-ant-...
-DISCORD_PUBLIC_KEY=...
-DISCORD_APPLICATION_ID=...
-DISCORD_BOT_TOKEN=...
-DISCORD_GUILD_ID=...          # optional; omit for global (~1h) registration
-JINA_API_KEY=...              # only if using the built-in web tools
-DATABASE_URL=postgresql://user:pass@host:5432/discord_agent
-```
-
-### 5. Initialize the database
-
-Creates the database (name taken from `DATABASE_URL`) and the `conversations` table:
-
-```bash
-python db/init_db.py
-```
-
-### 6. Register your slash command
-
-Using the bundled example:
-
-```bash
-python -m examples.research_agent.register_command
-```
-
-### 7. Deploy and connect to Discord
-
-Deploy your handler to a serverless host and set its public URL as the
-**Interactions Endpoint URL** in the Developer Portal (Discord sends a PING to
-verify the Ed25519 signature). The handler must be able to invoke itself for
-engine mode. See [`examples/research_agent/`](examples/research_agent/) for a
-complete, deployable example and step-by-step deploy notes.
-
-Then type your slash command (e.g. `/research <question>`) in your server.
+If you just want to run the tests locally, the [Quickstart](#quickstart) above is
+enough.
 
 ## Known trade-offs & open questions
 
