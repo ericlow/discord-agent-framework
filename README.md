@@ -95,7 +95,8 @@ Full step-by-step guides live in [`docs/setup/`](docs/setup/) — start with the
 2. [Database](docs/setup/database.md) — free Neon Postgres
 3. [Anthropic](docs/setup/anthropic.md) — Claude API key
 4. [Jina](docs/setup/jina.md) — web-tools key (only for the built-in tools)
-5. [Deploy](docs/setup/deploy.md) — build, `terraform apply`, register the command,
+5. [AWS](docs/setup/aws.md) — account + deploy credentials
+6. [Deploy](docs/setup/deploy.md) — build, `terraform apply`, register the command,
    and connect Discord
 
 If you just want to run the tests locally, the [Quickstart](#quickstart) above is

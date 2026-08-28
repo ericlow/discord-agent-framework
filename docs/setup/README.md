@@ -10,7 +10,8 @@ builds on the last, and the deploy step needs the credentials gathered earlier.
 3. **[Anthropic](anthropic.md)** — a Claude API key (and a little billing credit).
 4. **[Jina](jina.md)** — a key for the built-in `search_web` / `fetch_url` tools
    (skip if your agent doesn't use them).
-5. **[Deploy](deploy.md)** — build the package, `terraform apply` the Lambda,
+5. **[AWS](aws.md)** — an AWS account and deploy credentials for the AWS CLI.
+6. **[Deploy](deploy.md)** — build the package, `terraform apply` the Lambda,
    register the slash command, and set the Interactions Endpoint URL in Discord.
 
 ## Where secrets go
