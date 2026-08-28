@@ -50,6 +50,3 @@ code and Lambda's connection model).
 **Why Neon:** it's free-forever Postgres that drops into the existing code with a
 pooled connection string. Supabase's idle-pause is a reliability risk for a
 low-traffic bot; RDS isn't free-forever; DynamoDB would mean a persistence rewrite.
-
-> Free-tier terms (storage caps, idle-pause windows) should be re-verified against
-> current provider docs before this ADR is treated as final — they change frequently.
