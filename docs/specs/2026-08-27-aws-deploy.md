@@ -1,6 +1,6 @@
 # AWS Lambda deployment — Feature Spec
 
-_Status: draft_
+_Status: ready for implementation_
 _Last updated: 2026-08-27_
 
 ## Background
@@ -48,7 +48,8 @@ container image or separate layer needed.
 ### CI (GitHub Actions)
 On push to `main`: install deps into a build dir, zip with the package, and
 `aws lambda update-function-code`. AWS creds and app secrets come from GitHub
-Secrets. Terraform runs manually (or a separate plan/apply workflow) — TBD.
+Secrets. Terraform is **not** run in CI — infra is applied manually with local
+state (ADR-004).
 
 ### Database
 Postgres via **Neon** (external free tier). `DATABASE_URL` is a secret; `conversations`
@@ -71,12 +72,13 @@ Scenario: Slash command runs the agent
 
 ## Decisions
 
-| Question | Decision (proposed) | Rationale |
+| Question | Decision | Rationale |
 |---|---|---|
-| Postgres host | **Neon** (external, not in IaC) | Free tier; keeps RDS cost/complexity out; fits design goals |
-| Packaging | **CI-built zip** (Ubuntu, manylinux wheels) | Simplest reliable path for binary deps; no container/layer |
-| Terraform state | TBD | local vs remote (S3) backend — decide before apply |
-| Terraform in CI | TBD | manual apply vs automated plan/apply workflow |
+| Compute platform | **AWS Lambda** + Function URL | [ADR-001](../adr/ADR-001-compute-platform.md) — free forever, fits interaction model |
+| Postgres host | **Neon** (external, not in IaC) | [ADR-002](../adr/ADR-002-database.md) — free forever, standard Postgres |
+| Packaging | **CI-built zip** (Ubuntu, manylinux wheels) | [ADR-003](../adr/ADR-003-lambda-packaging.md) — no paid ECR, simplest |
+| Terraform state | **Local**, manual apply | [ADR-004](../adr/ADR-004-terraform-state-and-deploy.md) — truly $0, no extra accounts |
+| Terraform in CI | **No** — CI does code deploys only | [ADR-004](../adr/ADR-004-terraform-state-and-deploy.md) |
 
 ## Out of scope
 
