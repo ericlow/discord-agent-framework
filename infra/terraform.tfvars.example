@@ -1,0 +1,9 @@
+# Copy to terraform.tfvars (gitignored) and fill in. Never commit real values.
+aws_region             = "us-east-1"
+function_name          = "discord-agent"
+discord_public_key     = "..."
+discord_application_id = "..."
+discord_bot_token      = "..."
+anthropic_api_key      = "..."
+jina_api_key           = "..."
+database_url           = "postgresql://user:pass@host/db?sslmode=require"

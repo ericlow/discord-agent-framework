@@ -220,6 +220,9 @@ __marimo__/
 # Local planning notes — never commit (references the private source project)
 PLAN.md
 
+# Lambda build artifact
+function.zip
+
 # macOS
 .DS_Store
 .AppleDouble
