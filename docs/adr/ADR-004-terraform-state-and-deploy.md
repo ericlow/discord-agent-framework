@@ -44,11 +44,13 @@ apply stays manual, state can be local and CI needs no access to it.
 
 Judged on **free forever** and **simplicity** (goals), given apply is manual.
 
-| Option | Free forever? | Fit |
-|---|---|---|
-| **Local state + manual apply** | **Yes** | **Best** — zero infra, simplest, enough for a solo maintainer |
-| **Remote S3 backend** | No — S3 isn't always-free (state is tiny, ~cents/yr, but not $0) | Durable, locking, CI-automatable — but needs a bootstrap bucket and isn't needed while apply is manual |
+| Option | Free forever? | Extra account? | Fit |
+|---|---|---|---|
+| **Local state + manual apply** | **Yes — truly $0** | No | **Best** — zero infra, simplest, enough for a solo maintainer |
+| **Remote S3 backend** | No — state is tiny (~cents/yr) but not $0 | No (AWS already) | Durable, locking, CI-automatable; needs a bootstrap bucket |
+| **Terraform Cloud free tier** | Yes | **Yes — HashiCorp account** | Free remote state + CI-run apply, but adds a third-party account and platform tie-in |
 
-**Why local:** remote state's wins (durability, locking, CI-run apply) aren't needed
-for a solo, manually-applied setup, and it adds a paid resource plus bootstrap
-complexity. Revisit if apply moves into CI or multiple maintainers join.
+**Why local:** it's the only option that is *truly* $0 with no additional signups.
+We accept the trade-off that it is not the "ideal" (no locking, no CI-run apply,
+state on one machine) rather than pay even cents for S3 or add another account for
+Terraform Cloud. Revisit if apply moves into CI or multiple maintainers join.
