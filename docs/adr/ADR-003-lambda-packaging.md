@@ -47,5 +47,3 @@ Judged on **free forever** and **simplicity/fit**.
 don't matter at our size, while it adds ECR — extra infrastructure that is not
 free forever. Zip keeps the whole stack free and simple.
 
-> Free-tier terms should be re-verified against current provider docs before this
-> ADR is treated as final — they change frequently.
