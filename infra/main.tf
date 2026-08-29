@@ -97,8 +97,44 @@ resource "aws_lambda_function" "this" {
   ]
 }
 
-# Public HTTPS endpoint for Discord interactions.
-resource "aws_lambda_function_url" "this" {
-  function_name      = aws_lambda_function.this.function_name
-  authorization_type = "NONE"
+# --- Public ingress: API Gateway HTTP API (ADR-005) ---
+#
+# We front the Lambda with an API Gateway HTTP API instead of a Lambda Function
+# URL: this account has Lambda Block Public Access enabled, so Function URLs 403
+# regardless of their resource policy. API Gateway keeps the function private and
+# is the public entrance. Payload format 2.0 matches the event shape the handler
+# already expects (same as a Function URL).
+
+resource "aws_apigatewayv2_api" "this" {
+  name          = "${var.function_name}-interactions"
+  protocol_type = "HTTP"
+  description   = "Discord interactions endpoint for the ${var.function_name} agent"
+}
+
+resource "aws_apigatewayv2_integration" "this" {
+  api_id                 = aws_apigatewayv2_api.this.id
+  integration_type       = "AWS_PROXY"
+  integration_uri        = aws_lambda_function.this.invoke_arn
+  payload_format_version = "2.0"
+}
+
+resource "aws_apigatewayv2_route" "this" {
+  api_id    = aws_apigatewayv2_api.this.id
+  route_key = "POST /"
+  target    = "integrations/${aws_apigatewayv2_integration.this.id}"
+}
+
+resource "aws_apigatewayv2_stage" "this" {
+  api_id      = aws_apigatewayv2_api.this.id
+  name        = "$default"
+  auto_deploy = true
+}
+
+# Allow API Gateway to invoke the function.
+resource "aws_lambda_permission" "apigw" {
+  statement_id  = "AllowAPIGatewayInvoke"
+  action        = "lambda:InvokeFunction"
+  function_name = aws_lambda_function.this.function_name
+  principal     = "apigateway.amazonaws.com"
+  source_arn    = "${aws_apigatewayv2_api.this.execution_arn}/*/*"
 }
