@@ -8,14 +8,6 @@ name: Deploy
 # manually with Terraform; CI never runs Terraform.
 
 on:
-  push:
-    branches: [main]
-    paths:
-      - "discord_agent/**"
-      - "examples/**"
-      - "pyproject.toml"
-      - "scripts/build.sh"
-      - ".github/workflows/deploy.yml"
   workflow_dispatch:
 
 jobs:
