@@ -113,6 +113,10 @@ conversation is persisted for follow-up turns.
 - `AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY`, `AWS_REGION` — the deploy user's keys
 - `LAMBDA_FUNCTION_NAME` — from `terraform output function_name`
 
+Until these are set, the workflow **skips itself** on push (it logs a notice and
+exits green), so you won't see failed CI runs while using the local `terraform
+apply` path.
+
 Infra changes (the `infra/` directory) are still applied manually with Terraform
 ([ADR-004](../adr/ADR-004-terraform-state-and-deploy.md)).
 

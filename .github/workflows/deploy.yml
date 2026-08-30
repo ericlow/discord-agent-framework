@@ -1,7 +1,11 @@
 name: Deploy
 
-# Code deploys only (ADR-004): build the zip and update the Lambda's code.
-# Infrastructure is applied manually with Terraform; CI never runs Terraform.
+# Optional CI code deploys (ADR-003/ADR-004): build the zip and update the Lambda's
+# code. The blessed path deploys via `terraform apply`; this workflow is a
+# convenience for auto-deploying code on push. It stays dormant until the deploy
+# secrets are set (AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY, AWS_REGION,
+# LAMBDA_FUNCTION_NAME) — see docs/setup/deploy.md step 8. Infrastructure is applied
+# manually with Terraform; CI never runs Terraform.
 
 on:
   push:
@@ -18,16 +22,33 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
     steps:
+      - name: Check deploy is configured
+        id: guard
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          LAMBDA_FUNCTION_NAME: ${{ secrets.LAMBDA_FUNCTION_NAME }}
+        run: |
+          if [ -z "$AWS_ACCESS_KEY_ID" ] || [ -z "$LAMBDA_FUNCTION_NAME" ]; then
+            echo "::notice::CI deploy secrets not set — skipping. This project deploys via 'terraform apply' by default; set AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY, AWS_REGION and LAMBDA_FUNCTION_NAME to enable CI code deploys (docs/setup/deploy.md step 8)."
+            echo "configured=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "configured=true" >> "$GITHUB_OUTPUT"
+          fi
+
       - uses: actions/checkout@v4
+        if: steps.guard.outputs.configured == 'true'
 
       - uses: actions/setup-python@v5
+        if: steps.guard.outputs.configured == 'true'
         with:
           python-version: "3.12"
 
       - name: Build deployment zip
+        if: steps.guard.outputs.configured == 'true'
         run: bash scripts/build.sh
 
       - name: Update function code
+        if: steps.guard.outputs.configured == 'true'
         env:
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
