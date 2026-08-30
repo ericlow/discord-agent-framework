@@ -1,46 +1,35 @@
 name: Deploy
 
-# Optional CI code deploys (ADR-003/ADR-004): build the zip and update the Lambda's
-# code. The blessed path deploys via `terraform apply`; this workflow is a
-# convenience for auto-deploying code on push. It stays dormant until the deploy
-# secrets are set (AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY, AWS_REGION,
-# LAMBDA_FUNCTION_NAME) — see docs/setup/deploy.md step 8. Infrastructure is applied
-# manually with Terraform; CI never runs Terraform.
+# On check-in to main: build the zip and deploy it to Lambda. If the build or the
+# deploy fails (including missing AWS secrets), the run fails red — a green run
+# means the code was actually deployed. Infrastructure is applied manually with
+# Terraform (ADR-004); this workflow only updates the function's code.
 
 on:
+  push:
+    branches: [main]
+    paths:
+      - "discord_agent/**"
+      - "examples/**"
+      - "pyproject.toml"
+      - "scripts/build.sh"
+      - ".github/workflows/deploy.yml"
   workflow_dispatch:
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
     steps:
-      - name: Check deploy is configured
-        id: guard
-        env:
-          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          LAMBDA_FUNCTION_NAME: ${{ secrets.LAMBDA_FUNCTION_NAME }}
-        run: |
-          if [ -z "$AWS_ACCESS_KEY_ID" ] || [ -z "$LAMBDA_FUNCTION_NAME" ]; then
-            echo "::notice::CI deploy secrets not set — skipping. This project deploys via 'terraform apply' by default; set AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY, AWS_REGION and LAMBDA_FUNCTION_NAME to enable CI code deploys (docs/setup/deploy.md step 8)."
-            echo "configured=false" >> "$GITHUB_OUTPUT"
-          else
-            echo "configured=true" >> "$GITHUB_OUTPUT"
-          fi
-
       - uses: actions/checkout@v4
-        if: steps.guard.outputs.configured == 'true'
 
       - uses: actions/setup-python@v5
-        if: steps.guard.outputs.configured == 'true'
         with:
           python-version: "3.12"
 
       - name: Build deployment zip
-        if: steps.guard.outputs.configured == 'true'
         run: bash scripts/build.sh
 
-      - name: Update function code
-        if: steps.guard.outputs.configured == 'true'
+      - name: Deploy to Lambda
         env:
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
@@ -50,3 +39,23 @@ jobs:
             --function-name "${{ secrets.LAMBDA_FUNCTION_NAME }}" \
             --zip-file fileb://function.zip \
             --publish
+
+      # Smoke-test the live endpoint after deploying. A POST with no signature must
+      # return 401 (the function is up and rejecting unsigned requests). A 5xx or
+      # timeout means the deploy is broken, and this step fails the run red.
+      - name: Health check production
+        env:
+          PROD_URL: ${{ vars.PROD_HEALTHCHECK_URL }}
+        run: |
+          if [ -z "$PROD_URL" ]; then
+            echo "::error::PROD_HEALTHCHECK_URL variable is not set"; exit 1
+          fi
+          for i in 1 2 3 4 5; do
+            code=$(curl -s -o /dev/null -w "%{http_code}" -X POST "$PROD_URL" || echo 000)
+            echo "attempt $i: HTTP $code"
+            if [ "$code" = "401" ]; then
+              echo "healthy: function is live and rejecting unsigned requests"; exit 0
+            fi
+            sleep 5
+          done
+          echo "::error::Production health check failed (last status $code; expected 401)"; exit 1
